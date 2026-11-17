@@ -1372,10 +1372,11 @@ for the `path` field above:
 ~~~{.dart}
   // Using the Builder classes, you can write a list of structs like so:
   // Note that the intended order should be reversed if order is important.
+  final start = builder.startStructVector();
   final vec3Builder = new myGame.Vec3Builder(builder);
   vec3Builder.finish(4.0, 5.0, 6.0);
   vec3Builder.finish(1.0, 2.0, 3.0);
-  final int path = builder.endStructVector(2); // the length of the vector
+  final int path = builder.endStructVector(2, start); // the length of the vector
 
   // Otherwise, using the ObjectBuilder classes:
   // The dart implementation provides a simple interface for writing vectors

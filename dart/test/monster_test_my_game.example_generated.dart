@@ -1482,8 +1482,9 @@ class MonsterT implements fb.Packable {
     final int? testOffset = test?.pack(fbBuilder);
     int? test4Offset;
     if (test4 != null) {
+      final test4OffsetStart = fbBuilder.startStructVector();
       for (var e in test4!) { e.pack(fbBuilder); }
-      test4Offset = fbBuilder.endStructVector(test4!.length);
+      test4Offset = fbBuilder.endStructVector(test4!.length, test4OffsetStart);
     }
     final int? testarrayofstringOffset = testarrayofstring == null ? null
         : fbBuilder.writeList(testarrayofstring!.map(fbBuilder.writeString).toList());
@@ -1499,15 +1500,17 @@ class MonsterT implements fb.Packable {
         : fbBuilder.writeList(testarrayofstring2!.map(fbBuilder.writeString).toList());
     int? testarrayofsortedstructOffset;
     if (testarrayofsortedstruct != null) {
+      final testarrayofsortedstructOffsetStart = fbBuilder.startStructVector();
       for (var e in testarrayofsortedstruct!) { e.pack(fbBuilder); }
-      testarrayofsortedstructOffset = fbBuilder.endStructVector(testarrayofsortedstruct!.length);
+      testarrayofsortedstructOffset = fbBuilder.endStructVector(testarrayofsortedstruct!.length, testarrayofsortedstructOffsetStart);
     }
     final int? flexOffset = flex == null ? null
         : fbBuilder.writeListUint8(flex!);
     int? test5Offset;
     if (test5 != null) {
+      final test5OffsetStart = fbBuilder.startStructVector();
       for (var e in test5!) { e.pack(fbBuilder); }
-      test5Offset = fbBuilder.endStructVector(test5!.length);
+      test5Offset = fbBuilder.endStructVector(test5!.length, test5OffsetStart);
     }
     final int? vectorOfLongsOffset = vectorOfLongs == null ? null
         : fbBuilder.writeListInt64(vectorOfLongs!);

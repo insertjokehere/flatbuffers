@@ -1014,11 +1014,13 @@ class DartGenerator : public BaseGenerator {
           field.value.type.struct_def->fixed) {
         code += "    int? " + offset_name + ";\n";
         code += "    if (" + field_name + " != null) {\n";
+        code += "      final " + offset_name +
+                "Start = fbBuilder.startStructVector();\n";
         code +=
             "      for (var e in " + field_name + "!) { e.pack(fbBuilder); }\n";
         code += "      " + namer_.Variable(field) +
                 "Offset = fbBuilder.endStructVector(" + field_name +
-                "!.length);\n";
+                "!.length, " + offset_name + "Start);\n";
         code += "    }\n";
         continue;
       }

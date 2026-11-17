@@ -489,10 +489,40 @@ class Builder {
     _currentTableEndTail = _tail;
   }
 
-  /// Finish a Struct vector.  Most callers should preferto use [writeListOfStructs].
+  /// Marks where the elements of a Struct vector begin. Call this before
+  /// writing the first struct and pass the result to [endStructVector].
+  int startStructVector() {
+    assert(!_inVTable);
+    return _tail;
+  }
+
+  /// Finish a Struct vector.
+  ///
+  /// [start] is the value returned by [startStructVector] before the elements
+  /// were written. It is needed to place the padding (if the elements do not
+  /// add up to a multiple of 4 bytes) after the elements instead of between
+  /// the length prefix and the first element. When omitted, the padding is
+  /// placed before the elements, which only yields a valid vector if the
+  /// total element size is a multiple of 4.
   ///
   /// Most callers should prefer [writeListOfStructs].
-  int endStructVector(int count) {
+  int endStructVector(int count, [int? start]) {
+    if (start != null) {
+      final padding = (-_tail) & (_sizeofUint32 - 1);
+      if (padding != 0) {
+        final oldTail = _tail;
+        // Reserve room (may reallocate), then slide the elements towards the
+        // start of the buffer so the gap ends up behind them.
+        _prepare(1, padding);
+        final end = _buf.lengthInBytes;
+        final bytes = _buf.buffer.asUint8List(_buf.offsetInBytes, end);
+        bytes.setRange(end - oldTail - padding, end - start - padding,
+            bytes, end - oldTail);
+        for (var i = end - start - padding; i < end - start; i++) {
+          bytes[i] = 0;
+        }
+      }
+    }
     putUint32(count);
     return _tail;
   }
@@ -500,10 +530,11 @@ class Builder {
   /// Writes a list of Structs to the buffer, returning the offset
   int writeListOfStructs(List<ObjectBuilder> structBuilders) {
     assert(!_inVTable);
+    final start = startStructVector();
     for (var i = structBuilders.length - 1; i >= 0; i--) {
       structBuilders[i].finish(this);
     }
-    return endStructVector(structBuilders.length);
+    return endStructVector(structBuilders.length, start);
   }
 
   /// Write the given list of [values].

@@ -569,6 +569,29 @@ class BuilderTest {
     }
   }
 
+  /// FooProperties is a 2 byte struct, so vectors of 1 and 3 elements are not
+  /// a multiple of 4 bytes long and need padding after the elements.
+  void test_writeListOfStructs_unalignedSize() {
+    for (final count in [0, 1, 2, 3, 4, 5, 7]) {
+      final builder = Builder(initialSize: 0);
+      final offset = builder.writeListOfStructs([
+        for (var i = 0; i < count; i++)
+          example4.FooPropertiesObjectBuilder(a: i.isEven, b: i % 3 == 0),
+      ]);
+      builder.finish(offset);
+
+      final buf = BufferContext.fromBytes(builder.buffer);
+      final items =
+          ListReader<example4.FooProperties>(example4.FooProperties.reader)
+              .read(buf, 0);
+      expect(items, hasLength(count), reason: 'count=$count');
+      for (var i = 0; i < count; i++) {
+        expect(items[i].a, i.isEven, reason: 'count=$count i=$i');
+        expect(items[i].b, i % 3 == 0, reason: 'count=$count i=$i');
+      }
+    }
+  }
+
   void test_writeList_ofObjects([Builder? builder]) {
     List<int> byteList;
     {
